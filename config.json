@@ -1,0 +1,8 @@
+{
+  "cloud_api_key": "",
+  "cloud_api_url": "https://open.bigmodel.cn/api/paas/v4",
+  "cloud_model": "glm-4-flash",
+  "theme": "light",
+  "whisper_model": "tiny",
+  "duplicate_threshold": 0.6
+}
