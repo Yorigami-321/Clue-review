@@ -3,9 +3,10 @@ from PyQt5.QtWidgets import (
     QPushButton, QTabWidget, QVBoxLayout as QVBoxLayout2
 )
 from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtGui import QPalette, QColor
 
 from ui.widgets import success_btn, secondary_btn, card
-from ui.theme import Colors
+from ui.theme import Colors, FontSize
 from core.keywords import DEFAULT_KEYWORDS
 
 
@@ -52,10 +53,26 @@ class KeywordPage(QWidget):
             QTabBar::tab:selected {
                 font-size: 14px;
             }
+            QTabWidget::pane {
+                border: 1px solid #1a2260;
+                border-radius: 10px;
+                top: -1px;
+            }
         """)
+        # 使用 QPalette 设置 QTabWidget 背景色（更可靠）
+        palette = self.kw_tabs.palette()
+        palette.setColor(QPalette.Window, QColor(Colors.BG_CARD))
+        palette.setColor(QPalette.Base, QColor(Colors.BG_CARD))
+        self.kw_tabs.setPalette(palette)
+        self.kw_tabs.setAutoFillBackground(True)
         
         for cat, info in DEFAULT_KEYWORDS.items():
             tab = QWidget()
+            # 使用 QPalette 设置 tab 页面背景色（比 stylesheet 更可靠）
+            tab_palette = tab.palette()
+            tab_palette.setColor(QPalette.Window, QColor(Colors.BG_CARD))
+            tab.setPalette(tab_palette)
+            tab.setAutoFillBackground(True)
             tl = QVBoxLayout2(tab)
             desc = QLabel(f"📝 {info['description']}")
             desc.setWordWrap(True)
@@ -70,6 +87,17 @@ class KeywordPage(QWidget):
             kw_edit = QTextEdit()
             kw_edit.setText("，".join(info["keywords"]))
             kw_edit.setMinimumHeight(100)
+            # 直接设置样式属性，不要包含控件名称选择器
+            kw_edit.setStyleSheet(f"""
+                background-color: {Colors.BG_INPUT};
+                color: {Colors.TEXT_PRIMARY};
+                border: 1px solid {Colors.BORDER};
+                border-radius: 8px;
+                padding: 10px 14px;
+                font-size: {FontSize.INPUT}px;
+            """)
+            # 设置 viewport 的背景色（QTextEdit 内部的可滚动区域）
+            kw_edit.viewport().setStyleSheet(f"background-color: {Colors.BG_INPUT};")
             tl.addWidget(kw_edit)
             en_cb = QCheckBox("启用此分类")
             en_cb.setChecked(info["enabled"])
