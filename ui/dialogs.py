@@ -288,13 +288,14 @@ class StatisticsDialog(QDialog):
                     if os.path.exists(fp): font=fp; break
                 wc = WordCloud(font_path=font, width=900, height=600,
                     background_color=CHART_BG, max_words=150,
-                    colormap="cool").generate(all_text)
+                    colormap="cool", min_font_size=8, max_font_size=120).generate(all_text)
                 ax6.imshow(wc, interpolation="bilinear")
                 ax6.axis("off"); ax6.set_title("关键词云")
             else:
                 ax6.text(0.5,0.5,"无文本",ha="center",va="center",
                          transform=ax6.transAxes, color=CHART_TEXT)
-        except ImportError:
-            ax6.text(0.5,0.5,"需安装 wordcloud",ha="center",va="center",
+        except Exception as e:
+            # 捕获所有词云相关错误（包括空间不足、字体问题等）
+            ax6.text(0.5,0.5,f"词云生成失败\n{str(e)[:50]}",ha="center",va="center",
                      transform=ax6.transAxes, color=CHART_TEXT)
         fig6.tight_layout(); self.canvases["关键词云"].draw()
