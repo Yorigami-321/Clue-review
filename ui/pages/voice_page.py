@@ -40,6 +40,50 @@ class VoicePage(QWidget):
         row.addWidget(self._lbl("Whisper 模型:"))
         self.model_combo = QComboBox()
         self.model_combo.addItems(["tiny","base","small","medium","large"])
+        self.model_combo.setStyleSheet(f"""
+            QComboBox {{
+                border: 1px solid {Colors.BORDER};
+                border-radius: 8px;
+                padding: 9px 14px;
+                background-color: {Colors.BG_INPUT};
+                color: {Colors.TEXT_PRIMARY};
+                font-size: 20px;
+                min-height: 24px;
+            }}
+            QComboBox:hover {{
+                border: 1px solid {Colors.BORDER_LIGHT};
+            }}
+            QComboBox::drop-down {{
+                border: none;
+                width: 30px;
+            }}
+            QComboBox::down-arrow {{
+                image: none;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-top: 7px solid {Colors.TEXT_SECONDARY};
+                margin-right: 10px;
+            }}
+            QComboBox QAbstractItemView {{
+                background-color: {Colors.BG_CARD};
+                border: none;
+                color: {Colors.TEXT_PRIMARY};
+                font-size: 18px;
+                selection-background-color: {Colors.ACCENT_BLUE};
+                selection-color: {Colors.TEXT_WHITE};
+                outline: none;
+            }}
+            QComboBox QAbstractItemView::item {{
+                padding: 8px 14px;
+                min-height: 30px;
+                border: none;
+                background-color: transparent;
+            }}
+            QComboBox QAbstractItemView::item:selected {{
+                color: {Colors.TEXT_WHITE};
+                background-color: {Colors.ACCENT_BLUE};
+            }}
+        """)
         row.addWidget(self.model_combo)
         row.addStretch()
         mcl.addLayout(row)

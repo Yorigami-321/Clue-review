@@ -8,7 +8,7 @@ import sys
 import os
 
 # 设置 FFmpeg 路径（Whisper 依赖）
-FFMPEG_DIR = r"C:\于睿汐文件夹\ffmpeg-8.1-essentials_build\bin"
+FFMPEG_DIR = r"D:\APP\ffmpeg\bin"
 if os.path.isdir(FFMPEG_DIR):
     os.environ["PATH"] = FFMPEG_DIR + os.pathsep + os.environ.get("PATH", "")
 

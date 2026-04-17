@@ -1,1 +1,5 @@
 .venv/
+whisper_models/
+__pycache__/
+.idea/
+.vscode/
