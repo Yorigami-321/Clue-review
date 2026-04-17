@@ -2,8 +2,9 @@ from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QScrollArea, QGridLayout,
     QLabel, QLineEdit, QComboBox, QDateEdit, QTableWidget, QPushButton
 )
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal, QDate
 from PyQt5.QtGui import QFont, QColor
+from datetime import datetime
 
 from ui.widgets import primary_btn, secondary_btn, danger_btn, success_btn, warning_btn, gradient_btn, card, StatCard
 from ui.theme import Colors
@@ -117,11 +118,17 @@ class DashboardPage(QWidget):
         fl.addWidget(self.f_status)
 
         fl.addWidget(self._lbl("从:"))
-        self.d_from = QDateEdit(); self.d_from.setCalendarPopup(True)
+        self.d_from = QDateEdit()
+        self.d_from.setCalendarPopup(True)
+        self.d_from.setDate(QDate(2000, 1, 1))  # 默认很早的日期
         fl.addWidget(self.d_from)
 
         fl.addWidget(self._lbl("到:"))
-        self.d_to = QDateEdit(); self.d_to.setCalendarPopup(True)
+        self.d_to = QDateEdit()
+        self.d_to.setCalendarPopup(True)
+        # 设置为当前日期
+        today = datetime.now()
+        self.d_to.setDate(QDate(today.year, today.month, today.day))
         fl.addWidget(self.d_to)
 
         sbtn = primary_btn("🔍 搜索")

@@ -105,6 +105,11 @@ class MainWindow(QMainWindow):
         self.log_page = LogPage()
         self.log_page.refresh_logs_clicked.connect(self._refresh_log_table)
         
+        # 连接服务信号
+        self.clue_service.file_loaded.connect(self._file_ok)
+        self.clue_service.file_load_error.connect(self._file_err)
+        self.clue_service.progress_updated.connect(lambda m: self.sbar.showMessage(m))
+        
         # 设置初始值
         self.voice_page.set_model_combo_text(self.config.get("whisper_model", "base"))
         self.llm_page.set_api_key(self.config.get("cloud_api_key", ""))
@@ -502,11 +507,6 @@ class MainWindow(QMainWindow):
         p, _ = QFileDialog.getOpenFileName(self, "选择文件", "", "数据 (*.csv *.xlsx *.xls)")
         if not p: return
         
-        # 连接服务信号
-        self.clue_service.file_loaded.connect(self._file_ok)
-        self.clue_service.file_load_error.connect(self._file_err)
-        self.clue_service.progress_updated.connect(lambda m: self.sbar.showMessage(m))
-        
         self.dashboard_page.load_file_btn.setEnabled(False)
         self.clue_service.load_file(p)
 
@@ -516,6 +516,50 @@ class MainWindow(QMainWindow):
         self.dashboard_page.load_file_btn.setEnabled(True)
         self.dashboard_page.set_screen_btn_enabled(True)
         self.db.log_operation("导入文件", f"{len(df)} 条")
+        
+        # 将加载的数据插入到数据库中
+        if df is not None and not df.empty:
+            # 将DataFrame转换为字典列表
+            records = []
+            for _, row in df.iterrows():
+                raw_text = str(row.get('原始内容', '')) if pd.notna(row.get('原始内容')) else ''
+                masked_text = str(row.get('脱敏内容', '')) if pd.notna(row.get('脱敏内容')) else ''
+                
+                # 使用analyzer进行分类和分级
+                category, confidence = self.analyzer.classify(masked_text)
+                grade, _, desc = TextAnalyzer.get_grade(confidence)
+                grade_icon = TextAnalyzer.get_grade_icon(grade)
+                summary = self.analyzer.summarize(masked_text)
+                text_hash = TextAnalyzer.text_hash(raw_text)
+                
+                # 检查是否重复
+                if not self.db.check_duplicate(text_hash):
+                    record = {
+                        'raw_text': raw_text,
+                        'masked_text': masked_text,
+                        'category': category,
+                        'confidence': confidence,
+                        'grade': grade,
+                        'grade_icon': grade_icon,
+                        'summary': summary,
+                        'status': '待处理',
+                        'source': '文件导入',
+                        'text_hash': text_hash
+                    }
+                    records.append(record)
+            
+            # 批量插入数据库
+            if records:
+                self.db.insert_clues_batch(records)
+                self.db.log_operation("文件数据入库", f"{len(records)} 条")
+                
+                # 刷新表格和统计数据
+                self._refresh_table()
+                self._refresh_stats()
+                
+                QMessageBox.information(self, "导入成功", f"已导入 {len(records)} 条数据到台账")
+            else:
+                QMessageBox.information(self, "提示", "所有数据已存在，无需重复导入")
 
     def _file_err(self, err):
         """文件加载失败"""
